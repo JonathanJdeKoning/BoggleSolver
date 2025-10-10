@@ -2,7 +2,7 @@ class BoggleTrie:
     def __init__(self):
         self.root = {}
 
-    def add(self, word):
+    def add(self, word: str) -> None:
         head = self.root
         for i, c in enumerate(word):
             toAdd = c

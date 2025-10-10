@@ -11,11 +11,12 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 from words import loadWords, removeInvalidWords
 from boggletrie import BoggleTrie
+from collections import defaultdict
 
 driver = None
 
 
-def startDriver(url: str):
+def startDriver(url: str) -> Any:
     try:
         service = Service(ChromeDriverManager().install())
         chrome_options = Options()
@@ -29,7 +30,7 @@ def startDriver(url: str):
         print(f"An error occurred: {e}")
 
 
-def findLetters(N):
+def findLetters(N: int) -> List[str]:
     letterElements = []
     while len(letterElements) != N * N:
         letterElements = driver.find_elements(By.CLASS_NAME, "diceface")
@@ -38,7 +39,7 @@ def findLetters(N):
     return letters
 
 
-def findInput():
+def findInput() -> Any:
     return driver.find_element(By.ID, "wordInput")
 
 
@@ -56,7 +57,7 @@ def findWords(letters: List[Tuple[str]], trie: BoggleTrie) -> set:
 
     invalidWords = set()
 
-    def dfs(y, x, trieNode, path):
+    def dfs(y: int, x: int, trieNode: dict[str], path: set[Tuple[int, int]]) -> None:
 
         if "." in trieNode:
             word = trieNode["."]
