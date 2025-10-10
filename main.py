@@ -1,4 +1,5 @@
 import time
+import os
 from itertools import batched, pairwise
 from typing import List, Tuple, Any
 from selenium import webdriver
@@ -106,7 +107,9 @@ if __name__ == "__main__":
     N = 5
     difficulty = "hard"
     url = f"https://www.puzzle-words.com/boggle-{N}x{N}-{difficulty}/"
-    wordsFilepath = "C:/Trash Heap/boggle/wordlist.json"
+    
+    dirname = os.path.dirname(__file__)
+    wordsFilepath = os.path.join(dirname, 'wordlist.json')
 
     driver = startDriver(url)
     letters = splitArr(findLetters(N), N)
