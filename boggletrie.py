@@ -1,8 +1,9 @@
 class BoggleTrie:
-    def __init__(self):
+    def __init__(self, words={}):
         self.root = {}
+        self.addWords(words)
 
-    def add(self, word: str) -> None:
+    def addWord(self, word: str) -> None:
         head = self.root
         for i, c in enumerate(word):
             toAdd = c
@@ -16,3 +17,7 @@ class BoggleTrie:
                 head[toAdd] = {}
             head = head[toAdd]
         head["."] = word
+
+    def addWords(self, words):
+        for word in words:
+            self.addWord(word)
