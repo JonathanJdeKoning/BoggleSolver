@@ -8,15 +8,19 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
 
-from words import loadWords, removeInvalidWords
+
+from words import loadWords, removeWords, addWords
 from boggletrie import BoggleTrie
 from collections import defaultdict
 
 driver = None
 
 
-def startDriver(url: str) -> Any:
+def startDriver() -> Any:
     try:
         service = Service(ChromeDriverManager().install())
         chrome_options = Options()
@@ -24,7 +28,7 @@ def startDriver(url: str) -> Any:
         chrome_options.add_experimental_option("detach", True)
 
         driver = webdriver.Chrome(service=service, options=chrome_options)
-        driver.get(url)
+        driver.maximize_window()
         return driver
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -103,19 +107,53 @@ def inputWord(word: str) -> bool:
 
     return newScore != oldScore
 
+def scrollToElement(element):
+    ActionChains(driver).move_to_element(element).perform()
+
+def getMissedWords():
+    doneButton = driver.find_element(By.ID, "btnReady")
+    scrollToElement(doneButton)
+    doneButton.click()
+    
+    showSolutionLink = WebDriverWait(driver, 20).until(
+        EC.visibility_of_element_located((By.XPATH, "/html/body/div[2]/div[3]/div[2]/a"))
+    )
+    scrollToElement(showSolutionLink)
+    showSolutionLink.click()
+
+    solvedWord = WebDriverWait(driver, 20).until(
+        EC.visibility_of_element_located((By.CSS_SELECTOR, ".word.solved"))
+    )
+
+    unsolvedWordElements = driver.find_elements(By.CSS_SELECTOR, "div.word:not(div.word.solved)")
+    unsolvedWords = [element.text.strip().split()[0] for element in unsolvedWordElements]
+    return unsolvedWords
+
+
 
 if __name__ == "__main__":
+
+    driver = startDriver()
     N = 5
     difficulty = "hard"
+    #url = "https://www.puzzle-words.com/daily-boggle/"
     url = f"https://www.puzzle-words.com/boggle-{N}x{N}-{difficulty}/"
-    
-    dirname = os.path.dirname(__file__)
-    wordsFilepath = os.path.join(dirname, 'wordlist.json')
 
-    driver = startDriver(url)
+    dirname = os.path.dirname(__file__)
+    wordsFilepath = os.path.join(dirname, "wordlist.json")
+
+    driver.get(url)
     letters = splitArr(findLetters(N), N)
     inputBox = findInput()
     score = findScore()
     trie = loadWords(wordsFilepath)
     invalidWords = findWords(letters, trie)
-    removeInvalidWords(wordsFilepath, invalidWords)
+    removeWords(wordsFilepath, invalidWords)
+
+    missedWords = getMissedWords()
+    print(f"Missed: {missedWords}")
+    if missedWords:
+        addWords(wordsFilepath, missedWords)
+
+    #newPuzzleButton = driver.find_element(By.ID, "btnNew");
+    #newPuzzleButton.click()
