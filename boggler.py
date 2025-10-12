@@ -17,28 +17,36 @@ class Boggler:
         return url
 
     def playPuzzle(self, size, difficulty):
+        self.wordlist.loadWords()
         url = self.getFormattedURL(size, difficulty)
         self.boggleDriver.goto(url)
         self.board = self.boggleDriver.findBoard(size)
-        invalidWords = self.tryAllWords()
-        self.wordlist.removeWords(invalidWords)
-        unsolvedWords = self.boggleDriver.getUnsolvedWords()
-        self.wordlist.addWords(unsolvedWords)
+
+        foundWords = self.findAllWords()
+        self.inputWords(foundWords)
+        print(f"Invalid: {self.wordlist.invalidWords}")
+        self.wordlist.unsolvedWords = self.boggleDriver.getUnsolvedWords()
+        print(f"Unsolved: {self.wordlist.unsolvedWords}")
+        
+        self.wordlist.updateWordlist()
+        self.trie.addWords(foundWords)
         self.boggleDriver.newPuzzle()
 
-    def tryAllWords(self) -> set:
+    def inputWords(self, words):
+        for word in words:    
+            isValid = self.boggleDriver.inputWord(word)
+            if not isValid:
+                self.wordlist.invalidWords.append(word)
+
+    def findAllWords(self) -> set:
         N = len(self.board)
         directions = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
 
-        invalidWords = set()
+        foundWords = []
 
         def dfs(y: int, x: int, trieNode, path) -> None:
             if "." in trieNode:
-                word = trieNode["."]
-                isValid = self.boggleDriver.inputWord(word)
-                if not isValid:
-                    invalidWords.add(word)
-
+                foundWords.append(trieNode["."])
                 del trieNode["."]
 
             path.add((y, x))
@@ -66,6 +74,6 @@ class Boggler:
 
                 dfs(i, j, self.trie.root[cell], {(i, j)})
 
-        return invalidWords
+        return foundWords 
 
 

@@ -5,6 +5,8 @@ class Wordlist:
         dirname = os.path.dirname(__file__)
         self.path = os.path.join(dirname, filename)
         self.data = {}
+        self.invalidWords = []
+        self.unsolvedWords = []
         self.loadWords()
         
 
@@ -20,10 +22,18 @@ class Wordlist:
     
     def removeWords(self, words) -> None:
         for word in words:
-            del self.data[word]
+            self.data.pop(word, None)
 
 
     def addWords(self, words) -> None:
         for word in words:
+            if word in self.data:
+                print(f"Freaky Word: {word}")
             self.data[word] = 1
+
+    def updateWordlist(self):
+        self.addWords(self.unsolvedWords)
+        self.removeWords(self.invalidWords)
+        self.unsolvedWords = []
+        self.invalidWords = []
         self.saveWords()

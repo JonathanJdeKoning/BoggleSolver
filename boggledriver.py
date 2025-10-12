@@ -96,6 +96,5 @@ class BoggleDriver:
         self.inputElement.send_keys(word)
         self.inputElement.send_keys(Keys.RETURN)
         newScore = self.getScore()
-
         return newScore != oldScore
 
