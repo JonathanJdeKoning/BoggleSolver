@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
 
     int N = grid.size();
 
-    std::ifstream inputFile("C:/Trash Heap/BoggleSolver/wordlist.txt");
+    std::ifstream inputFile("wordlist.txt");
     std::string line;
     Trie myTrie = Trie();
     if (inputFile.is_open()) {
